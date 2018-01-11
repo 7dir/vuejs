@@ -1,0 +1,57 @@
+<template>
+  <table>
+    <thead>
+      <tr>
+        <% vue_attributes.each do |attribute| %><th><%= attribute.name.humanize %></th>
+        <% end %><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="<%= name.camelize(:lower) %> in <%= pluralized_state_name %>">
+        <template v-if="editting(<%= name.camelize(:lower) %>.id)">
+          <%# TODO - move to partial %>
+          <% vue_attributes.each do |attribute| %><td>
+            <% case attribute.type when :string %><input type="text" v-model="current<%= name.camelize %>.<%= attribute.name %>">
+            <% when :boolean %><input type="checkbox" v-model="current<%= name.camelize %>.<%= attribute.name %>">
+            <% when :text %><textarea v-model="current<%= name.camelize %>.<%= attribute.name %>"></textarea>
+            <% when :integer %><input type="number" v-model="current<%= name.camelize %>.<%= attribute.name %>">
+            <%# TODO - datetime, date, fk-ref %>
+            <% end %>
+          </td>
+          <% end %>
+        </template>
+        <template v-else>
+          <% vue_attributes.each do |attribute| %><td>{{ <%= name.camelize(:lower) %>.<%= attribute.name %> }}</td>
+          <% end %>
+        </template>
+        <td>
+          <button @click="edit<%= name.camelize %>(<%= name.camelize(:lower) %>.id)" v-if="!editting(<%= name.camelize(:lower) %>.id)">Edit</button>
+          <button @click="update<%= name.camelize %>()" v-if="editting(<%= name.camelize(:lower) %>.id)">Save</button>
+          <button @click="delete<%= name.camelize %>(<%= name.camelize(:lower) %>.id)">Delete</button>
+        </td>
+      </tr>
+      <tr>
+        <% vue_attributes.each do |attribute| %><td>
+          <%# TODO - move to partial %>
+          <% case attribute.type when :string %><input type="text" v-model="new<%= name.camelize %>.<%= attribute.name %>">
+          <% when :boolean %><input type="checkbox" v-model="new<%= name.camelize %>.<%= attribute.name %>">
+          <% when :text %><textarea v-model="new<%= name.camelize %>.<%= attribute.name %>"></textarea>
+          <% when :integer %><input type="number" v-model="new<%= name.camelize %>.<%= attribute.name %>">
+          <%# TODO - datetime, date, fk-ref %>
+          <% end %>
+        </td>
+        <% end %>
+        <td><button @click="create<%= name.camelize %>()">Create <%= name.humanize %></button></td>
+      </tr>
+    </tbody>
+    <tfoot v-if="errors">
+      <tr style="color: red;">
+        <% vue_attributes.each do |attribute| %><td v-if="errors.<%= attribute.name %>"><%= attribute.name.humanize %> {{ errors.<%= attribute.name %>.join(', ') }}</td>
+        <% end %>
+      </tr>
+    </tfoot>
+  </table>
+</template>
+
+<script src="./<%= name %>.js"></script>
+<style src="./<%= name %>.css"></style>

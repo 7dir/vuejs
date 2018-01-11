@@ -1,0 +1,83 @@
+import axios from 'axios';
+
+export default {
+  data: function () {
+    return {
+      <%= pluralized_state_name %>: [],
+      new<%= name.camelize %>: {
+        <%= vue_attributes.map { |attribute| "#{attribute.name}: null" }.join(",\n        ") %>
+      },
+      current<%= name.camelize %>: null,
+      errors: null
+    }
+  },
+  mounted: function () {
+    var token = document.getElementsByName('csrf-token')[0].getAttribute('content');
+    axios.defaults.headers.common['X-CSRF-Token'] = token;
+    axios.defaults.headers.common['Accept'] = 'application/json';
+    this.get<%= name.tableize.camelize %>();
+  },
+  methods: {
+    get<%= name.tableize.camelize %>: function () {
+      var vm = this;
+      axios.get('/<%= name.tableize %>.json')
+          .then(function(res) {
+            vm.<%= pluralized_state_name %> = res.data;
+          })
+          .catch(function (err) {
+            console.error(err);
+          })
+    },
+    create<%= name.camelize %>: function () {
+      var vm = this;
+      axios.post('/<%= name.tableize %>.json', { <%= name %>: this.new<%= name.camelize %> })
+        .then(function (res) {
+          vm.<%= pluralized_state_name %>.push(res.data);
+          vm.new<%= name.camelize %> = {
+            <%= vue_attributes.map { |attribute| "#{attribute.name}: null" }.join(",\n            ") %>
+          };
+          vm.errors = null;
+        })
+        .catch(function (err) {
+          if (err.response) {
+            vm.errors = err.response.data;
+          } else {
+            console.error(err);
+          }
+        })
+    },
+    edit<%= name.camelize %>: function (id) {
+      this.current<%= name.camelize %> = this.<%= pluralized_state_name %>.find(function (item) { return item.id === id });
+    },
+    update<%= name.camelize %>: function () {
+      var vm = this;
+      axios.put(`/<%= name.tableize %>/${this.current<%= name.camelize %>.id}.json`, { <%= name %>: this.current<%= name.camelize %> })
+        .then(function (res) {
+          vm.current<%= name.camelize %> = null;
+          vm.errors = null;
+        })
+        .catch(function (err) {
+          if (err.response) {
+            vm.errors = err.response.data;
+          } else {
+            console.error(err);
+          }
+        })
+    },
+    delete<%= name.camelize %>: function (id) {
+      var vm = this;
+      axios.delete(`/<%= name.tableize %>/${id}.json`)
+        .then(function (res) {
+          var item = vm.<%= pluralized_state_name %>.find(function (item) { return item.id === id });
+          var itemIndex = vm.<%= pluralized_state_name %>.indexOf(item);
+          vm.<%= pluralized_state_name %>.splice(itemIndex, 1);
+        })
+        .catch(function (err) {
+          console.error(err);
+        });
+    },
+    editting: function (id) {
+      return (this.current<%= name.camelize %> && this.current<%= name.camelize %>.id === id);
+    }
+  }
+}

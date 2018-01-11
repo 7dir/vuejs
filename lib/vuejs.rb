@@ -15,6 +15,7 @@ module Vuejs
       puts "version: "
     end
 
+    desc :move, "" # ????
     def move
       # cp node_modules/vue/dist/vue.min.js app/assets/javascripts/
     end
